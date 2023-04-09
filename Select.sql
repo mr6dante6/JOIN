@@ -43,7 +43,6 @@ join album a on a.album_id = com.album_id
 join album_executors ae on ae.album_id = a.album_id 
 join executors e on e.executors_id = ae.executors_id 
 where e.executor_name = 'Korn'
-group by c.collection_name 
 
 
 select a.album_name, e.executor_name, count(g.genre_name) as count_genre
@@ -68,25 +67,16 @@ from compositions c
 left join album a on a.album_id = c.album_id 
 left join album_executors ae on ae.album_id = a.album_id
 left join executors e on e.executors_id  = ae.executors_id 
-group by e.executor_name , c.duration
-having c.duration = (select min(duration) from compositions)
-order by e.executor_name
+where c.duration = (select min(duration) from compositions)
 
 
 select distinct (a.album_name), a.album_id  
 from album as a
 left join compositions c on c.album_id = a.album_id
-where c.album_id in (
-    select album_id
-    from compositions c
-    group by album_id
-    having count(album_id) = (
-        select count(album_id)
-        from compositions c
-        group by album_id
-        order by count
-        limit 1
+group by a.album_id 
+having count(c.album_id) = (
+	select count(c.album_id) from compositions c
+	group by c.album_id
+    order by 1
+    limit 1
     )
-)
-order by a.album_name 
-
